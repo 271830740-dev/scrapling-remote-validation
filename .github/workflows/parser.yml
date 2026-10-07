@@ -1,0 +1,36 @@
+name: Offline parser validation
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: offline-parser-validation
+  cancel-in-progress: false
+jobs:
+  parser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@f548e57e544e1ff5a4c46bf1e1b8685f8e4a348a
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@06da6279cdbca41027908073e81a4544dc79c06b
+        with:
+          python-version: '3.12'
+      - name: Install parser only
+        run: python -m pip install --disable-pip-version-check 'scrapling==0.4.15'
+      - name: Validate synthetic fixtures and record execution
+        shell: bash
+        run: |
+          mkdir -p evidence
+          python record_environment.py
+          python remote_parser_check.py > evidence/result.json 2> evidence/stderr.txt
+          sha256sum remote_parser_check.py record_environment.py evidence/result.json evidence/environment.json > evidence/SHA256SUMS.txt
+      - name: Save raw remote evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: parser-evidence
+          path: evidence/
+          retention-days: 1
+          if-no-files-found: error
