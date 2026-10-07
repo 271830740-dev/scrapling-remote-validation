@@ -27,7 +27,8 @@ jobs:
           python remote_parser_check.py > evidence/result.json 2> evidence/stderr.txt
           python remote_quote_guard_check.py > evidence/quote-guard-result.json 2> evidence/quote-guard-stderr.txt
           python remote_json_check.py > evidence/json-result.json 2> evidence/json-stderr.txt
-          sha256sum remote_parser_check.py guarded_extraction.py remote_quote_guard_check.py quote_json.py remote_json_check.py record_environment.py evidence/result.json evidence/quote-guard-result.json evidence/json-result.json evidence/environment.json > evidence/SHA256SUMS.txt
+          python remote_comparison_check.py > evidence/comparison-result.json 2> evidence/comparison-stderr.txt
+          sha256sum remote_parser_check.py guarded_extraction.py remote_quote_guard_check.py quote_json.py remote_json_check.py quote_comparison.py remote_comparison_check.py record_environment.py evidence/result.json evidence/quote-guard-result.json evidence/json-result.json evidence/comparison-result.json evidence/environment.json > evidence/SHA256SUMS.txt
       - name: Save raw remote evidence
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
